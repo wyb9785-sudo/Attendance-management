@@ -1,0 +1,165 @@
+/* 基础样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* 表格样式 */
+.table {
+    font-size: 0.9rem;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* 状态标签 */
+.status-正常 {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.status-迟到, .status-早退, .status-工时不足 {
+    color: #ffc107;
+    font-weight: 500;
+}
+
+.status-缺勤 {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* 通知消息 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    z-index: 1000;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+.notification.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+}
+/* 通知消息样式 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+    min-width: 300px;
+}
+
+.notification .toast {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.notification.success .toast-header {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.notification.error .toast-header {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+/* 状态标签样式 */
+.status-正常 {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.status-迟到, .status-早退, .status-工时不足 {
+    color: #ffc107;
+    font-weight: 500;
+}
+
+.status-缺勤 {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.status-待审批 {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.status-已通过 {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.status-已驳回 {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .notification {
+        min-width: auto;
+        width: 90%;
+        left: 5%;
+        right: 5%;
+    }
+
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}

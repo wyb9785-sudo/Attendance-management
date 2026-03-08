@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <script th:src="@{/static/js/admin.js}" defer></script>
+    <script th:src="@{/static/js/common.js}" defer></script>
+    <script th:src="@{/static/js/employee.js}" defer></script>
+</head>
+<body>
+<header class="bg-primary text-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center py-3">
+            <h1 class="h4 mb-0">考勤管理系统</h1>
+            <nav>
+                <a class="text-white mx-2" th:href="@{/admin/attendance}"><i class="bi bi-calendar-check"></i> 考勤管理</a>
+                <a class="text-white mx-2" th:href="@{/admin/leave}"><i class="bi bi-clock-history"></i> 请假管理</a>
+                <a class="text-white mx-2" th:href="@{/admin/user}"><i class="bi bi-people"></i> 用户管理</a>
+                <a class="text-white mx-2" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> 退出</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container my-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">用户管理</h2>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-plus"></i> 添加用户
+            </button>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>员工编号</th>
+                        <th>姓名</th>
+                        <th>部门</th>
+                        <th>职位</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="user-list">
+                    <!-- 数据将通过JS动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加用户模态框 -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">添加新用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-user-form">
+                        <div class="mb-3">
+                            <label for="empId" class="form-label">员工编号</label>
+                            <input type="text" class="form-control" id="empId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="empName" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="empName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">密码</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptId" class="form-label">部门</label>
+                            <select class="form-select" id="deptId" required>
+                                <!-- 部门选项将通过JS动态加载 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="position" class="form-label">职位</label>
+                            <input type="text" class="form-control" id="position" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hireDate" class="form-label">入职日期</label>
+                            <input type="date" class="form-control" id="hireDate" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">角色</label>
+                            <select class="form-select" id="role" required>
+                                <option value="ROLE_EMPLOYEE">普通员工</option>
+                                <option value="ROLE_MANAGER">管理员</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-add-user">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑用户模态框 -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-user-form">
+                        <input type="hidden" id="edit-empId">
+                        <div class="mb-3">
+                            <label for="edit-empName" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="edit-empName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-deptId" class="form-label">部门</label>
+                            <select class="form-select" id="edit-deptId" required>
+                                <!-- 部门选项将通过JS动态加载 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-position" class="form-label">职位</label>
+                            <input type="text" class="form-control" id="edit-position" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-hireDate" class="form-label">入职日期</label>
+                            <input type="date" class="form-control" id="edit-hireDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-role" class="form-label">角色</label>
+                            <select class="form-select" id="edit-role" required>
+                                <option value="ROLE_EMPLOYEE">普通员工</option>
+                                <option value="ROLE_MANAGER">管理员</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-status" class="form-label">状态</label>
+                            <select class="form-select" id="edit-status" required>
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-edit-user">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+        const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const users = await fetchData('/api/admin/user/list');
+                renderUsers(users);
+            } catch (error) {
+                showNotification('加载用户列表失败: ' + error.message, 'error');
+            }
+        }
+
+        // 加载部门列表
+        async function loadDepartments() {
+            try {
+                const depts = await fetchData('/api/admin/user/departments');
+                const addDeptSelect = document.getElementById('deptId');
+                const editDeptSelect = document.getElementById('edit-deptId');
+
+                addDeptSelect.innerHTML = '';
+                editDeptSelect.innerHTML = '';
+
+                depts.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.deptId;
+                    option.textContent = dept.deptName;
+                    addDeptSelect.appendChild(option.cloneNode(true));
+                    editDeptSelect.appendChild(option.cloneNode(true));
+                });
+            } catch (error) {
+                console.error('加载部门列表失败:', error);
+            }
+        }
+
+        // 渲染用户列表
+        function renderUsers(users) {
+            const tbody = document.getElementById('user-list');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">没有用户数据</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${user.empId}</td>
+                <td>${user.empName}</td>
+                <td>${user.deptName}</td>
+                <td>${user.position}</td>
+                <td>${formatRole(user.role)}</td>
+                <td class="${user.status === 1 ? 'text-success' : 'text-danger'}">${user.status === 1 ? '启用' : '禁用'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${user.empId}">
+                        <i class="bi bi-pencil"></i> 编辑
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${user.empId}">
+                        <i class="bi bi-trash"></i> 删除
+                    </button>
+                </td>
+            `;
+                tbody.appendChild(row);
+            });
+
+            // 绑定编辑按钮事件
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const empId = this.getAttribute('data-id');
+                    try {
+                        const user = await fetchData(`/api/admin/user/${empId}`);
+
+                        document.getElementById('edit-empId').value = user.empId;
+                        document.getElementById('edit-empName').value = user.empName;
+                        document.getElementById('edit-deptId').value = user.deptId;
+                        document.getElementById('edit-position').value = user.position;
+                        document.getElementById('edit-role').value = user.role;
+                        document.getElementById('edit-status').value = user.status;
+
+                        editUserModal.show();
+                    } catch (error) {
+                        showNotification('获取用户信息失败: ' + error.message, 'error');
+                    }
+                });
+            });
+
+            // 绑定删除按钮事件
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const empId = this.getAttribute('data-id');
+                    if (confirm(`确定要删除员工 ${empId} 吗？`)) {
+                        deleteUser(empId);
+                    }
+                });
+            });
+        }
+
+        // 添加用户
+        document.getElementById('submit-add-user').addEventListener('click', async function() {
+            const user = {
+                empId: document.getElementById('empId').value,
+                empName: document.getElementById('empName').value,
+                password: document.getElementById('password').value,
+                deptId: document.getElementById('deptId').value,
+                position: document.getElementById('position').value,
+                hireDate: document.getElementById('hireDate').value,
+                role: document.getElementById('role').value
+
+            };
+            try {
+                const response = await fetchData('/api/admin/user/create', 'POST', user);
+                showNotification(response.message, 'success');
+                addUserModal.hide();
+                loadUsers();
+            } catch (error) {
+                showNotification('用户添加失败: ' + error.message, 'error');
+            }
+        });
+
+        // 编辑用户
+        document.getElementById('submit-edit-user').addEventListener('click', async function() {
+            const user = {
+                empId: document.getElementById('edit-empId').value,
+                empName: document.getElementById('edit-empName').value,
+                deptId: document.getElementById('edit-deptId').value,
+                position: document.getElementById('edit-position').value,
+                hireDate: document.getElementById('edit-hireDate').value,
+                role: document.getElementById('edit-role').value,
+                status: document.getElementById('edit-status').value
+            };
+
+            try {
+                await fetchData(`/api/admin/user/${user.empId}`, 'PUT', user);
+                showNotification('用户信息更新成功', 'success');
+                editUserModal.hide();
+                loadUsers();
+            } catch (error) {
+                showNotification('用户信息更新失败: ' + error.message, 'error');
+            }
+        });
+
+        // 删除用户
+        async function deleteUser(empId) {
+            try {
+                await fetchData(`/api/admin/user/delete/${empId}`, 'DELETE');
+                showNotification('用户删除成功', 'success');
+                loadUsers();
+            } catch (error) {
+                showNotification('用户删除失败: ' + error.message, 'error');
+            }
+        }
+
+        // 格式化角色显示
+        function formatRole(role) {
+            const roles = {
+                'ROLE_EMPLOYEE': '普通员工',
+                'ROLE_MANAGER': '管理员'
+            };
+            return roles[role] || role;
+        }
+
+        // 初始化页面
+        loadUsers();
+        loadDepartments();
+    });
+</script>
+</body>
+</html>

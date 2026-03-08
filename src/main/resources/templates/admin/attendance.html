@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>考勤管理</title>
+  <link rel="stylesheet" th:href="@{/static/css/style.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+</head>
+<body>
+<header class="bg-primary text-white">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center py-3">
+      <h1 class="h4 mb-0">考勤管理系统</h1>
+      <nav>
+        <a class="text-white mx-2" th:href="@{/admin/attendance}"><i class="bi bi-calendar-check"></i> 考勤管理</a>
+        <a class="text-white mx-2" th:href="@{/admin/leave}"><i class="bi bi-clock-history"></i> 请假管理</a>
+        <a class="text-white mx-2" th:href="@{/admin/user}"><i class="bi bi-people"></i> 用户管理</a>
+        <a class="text-white mx-2" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> 退出</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-light">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#employee-tab">员工考勤</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#dept-tab">部门考勤</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#today-tab">今日考勤</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card-body">
+      <div class="tab-content">
+        <!-- 员工考勤查询 -->
+        <div class="tab-pane fade show active" id="employee-tab">
+          <h2 class="h5 mb-4">员工考勤查询</h2>
+          <form id="employee-form" class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label for="empName" class="form-label">员工姓名</label>
+              <input type="text" class="form-control" id="empName" required>
+            </div>
+            <div class="col-md-3">
+              <label for="year" class="form-label">年份</label>
+              <select class="form-select" id="year"></select>
+            </div>
+            <div class="col-md-3">
+              <label for="month" class="form-label">月份</label>
+              <select class="form-select" id="month"></select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary">查询</button>
+            </div>
+          </form>
+
+          <div id="employee-result">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-light">
+                <tr>
+                  <th>日期</th>
+                  <th>姓名</th>
+                  <th>部门</th>
+                  <th>签到时间</th>
+                  <th>签退时间</th>
+                  <th>状态</th>
+                </tr>
+                </thead>
+                <tbody id="employee-records">
+                <!-- 数据将通过JS动态加载 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 部门考勤统计 -->
+        <div class="tab-pane fade" id="dept-tab">
+          <h2 class="h5 mb-4">部门考勤统计</h2>
+          <form id="dept-form" class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label for="deptSelect" class="form-label">部门</label>
+              <select class="form-select" id="deptSelect">
+                <option value="">全部部门</option>
+                <!-- 部门选项将通过JS动态加载 -->
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="deptYear" class="form-label">年份</label>
+              <select class="form-select" id="deptYear"></select>
+            </div>
+            <div class="col-md-3">
+              <label for="deptMonth" class="form-label">月份</label>
+              <select class="form-select" id="deptMonth"></select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary">查询</button>
+            </div>
+          </form>
+
+          <div id="dept-result">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-light">
+                <tr>
+                  <th>部门</th>
+                  <th>日期</th>
+                  <th>姓名</th>
+                  <th>签到时间</th>
+                  <th>签退时间</th>
+                  <th>工作时长</th>
+                  <th>状态</th>
+                </tr>
+                </thead>
+                <tbody id="dept-stats">
+                <!-- 数据将通过JS动态加载 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 今日考勤 -->
+        <div class="tab-pane fade" id="today-tab">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                  <h3 class="h6 mb-0">我的考勤状态</h3>
+                </div>
+                <div class="card-body text-center">
+                  <div id="attendance-status" class="mb-4">
+                    <div class="alert alert-info">
+                      <h4 class="alert-heading">今日考勤状态</h4>
+                      <hr>
+                      <p id="sign-in-info">签到时间: 未签到</p>
+                      <p id="sign-out-info">签退时间: 未签退</p>
+                      <p id="attendance-state" class="mb-0">状态: 未签到</p>
+                    </div>
+                  </div>
+                  <div class="d-grid gap-3">
+                    <button id="sign-in-btn" class="btn btn-success btn-lg">
+                      <i class="bi bi-box-arrow-in-right"></i> 签到
+                    </button>
+                    <button id="sign-out-btn" class="btn btn-warning btn-lg" disabled>
+                      <i class="bi bi-box-arrow-right"></i> 签退
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h3 class="h6 mb-0">今日考勤统计</h3>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-sm">
+                      <thead>
+                      <tr>
+                        <th>状态</th>
+                        <th>人数</th>
+                        <th>占比</th>
+                      </tr>
+                      </thead>
+                      <tbody id="today-stats">
+                      <tr>
+                        <td>正常</td>
+                        <td id="normal-count">0</td>
+                        <td id="normal-percent">0%</td>
+                      </tr>
+                      <tr>
+                        <td>迟到</td>
+                        <td id="late-count">0</td>
+                        <td id="late-percent">0%</td>
+                      </tr>
+                      <tr>
+                        <td>早退</td>
+                        <td id="early-count">0</td>
+                        <td id="early-percent">0%</td>
+                      </tr>
+                      <tr>
+                        <td>缺勤</td>
+                        <td id="absent-count">0</td>
+                        <td id="absent-percent">0%</td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 初始化日期选择器
+    initYearSelect('#year');
+    initMonthSelect('#month');
+    initYearSelect('#deptYear');
+    initMonthSelect('#deptMonth');
+
+    // 加载部门列表
+    loadDepartments();
+
+    loadTodayStats();
+
+    // 员工考勤查询
+    document.getElementById('employee-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const empName = document.getElementById('empName').value;
+      const year = document.getElementById('year').value;
+      const month = document.getElementById('month').value;
+
+      try {
+        const response = await fetch(`/api/admin/attendance/employee?empName=${empName}&year=${year}&month=${month}`);
+        if (!response.ok) {
+          throw new Error('请求失败，状态码：' + response.status);
+        }
+        const records = await response.json();
+        displayEmployeeResults(records);
+      } catch (error) {
+        console.error('获取考勤记录失败:', error);
+        showNotification('查询失败: ' + error.message, 'error');
+      }
+    });
+
+    // 部门考勤查询
+    document.getElementById('dept-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const deptName = document.getElementById('deptSelect').value;
+      const year = document.getElementById('deptYear').value;
+      const month = document.getElementById('deptMonth').value;
+
+      try {
+        const data = await fetchData(`/api/admin/attendance/stats?deptName=${encodeURIComponent(deptName)}&year=${year}&month=${month}`);
+        displayDeptResults(data.records);
+      } catch (error) {
+        showNotification('查询失败: ' + error.message, 'error');
+      }
+    });
+
+    // 签到功能
+    document.getElementById('sign-in-btn').addEventListener('click', async () => {
+      try {
+        const btn = document.getElementById('sign-in-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 签到中...';
+
+        const response = await fetch('/api/admin/attendance/sign-in', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        const result = await response.json();
+        if (response.ok) {
+          // 更新UI状态
+          document.getElementById('sign-in-info').textContent = `签到时间: ${result.signInTime || '未签到'}`;
+          document.getElementById('sign-out-info').textContent = `签退时间: ${result.signOutTime || '未签退'}`;
+          document.getElementById('attendance-state').textContent = `状态: ${result.status || '已签到'}`;
+          // 更新按钮状态
+          document.getElementById('sign-out-btn').disabled = result.hasSignedOut;
+          showNotification(result.message, 'success');
+          await loadTodayStats(); // 刷新统计数据
+        } else {
+          showNotification('签到失败: ' + (result.error || '未知错误'), 'error');
+        }
+      } catch (error) {
+        showNotification('签到请求失败: ' + error.message, 'error');
+      } finally {
+        const btn = document.getElementById('sign-in-btn');
+        btn.disabled = document.getElementById('sign-in-info').textContent.includes('未签到') ? false : true;
+        btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> 签到';
+      }
+    });
+
+    // 签退功能
+    document.getElementById('sign-out-btn').addEventListener('click', async () => {
+      try {
+        const btn = document.getElementById('sign-out-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 签退中...';
+
+        const response = await fetch('/api/admin/attendance/sign-out', {
+          method: 'POST',
+          credentials: 'include'
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // 更新UI状态
+          document.getElementById('sign-out-info').textContent = `签退时间: ${result.signOutTime || '未签退'}`;
+          document.getElementById('attendance-state').textContent = `状态: ${result.status || '已签退'}`;
+
+          // 更新按钮状态
+          document.getElementById('sign-in-btn').disabled = true;
+          document.getElementById('sign-out-btn').disabled = true;
+
+          showNotification(result.message, 'success');
+          await loadTodayStats(); // 刷新统计数据
+        } else {
+          showNotification('签退失败: ' + (result.error || '未知错误'), 'error');
+        }
+      } catch (error) {
+        showNotification('签退请求失败: ' + error.message, 'error');
+      } finally {
+        const btn = document.getElementById('sign-out-btn');
+        btn.disabled = document.getElementById('sign-out-info').textContent.includes('未签退') ? false : true;
+        btn.innerHTML = '<i class="bi bi-box-arrow-right"></i> 签退';
+      }
+    });
+
+    // 检查今日签到状态
+    async function checkTodayAttendance() {
+      try {
+        const response = await fetch('/api/admin/attendance/today', {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const signInBtn = document.getElementById('sign-in-btn');
+          const signOutBtn = document.getElementById('sign-out-btn');
+
+          document.getElementById('sign-in-info').textContent = `签到时间: ${data.signInTime || '未签到'}`;
+          document.getElementById('sign-out-info').textContent = `签退时间: ${data.signOutTime || '未签退'}`;
+
+          let statusText = '状态: ';
+          let statusClass = '';
+
+          if (data.status === '正常') {
+            statusText += '正常';
+            statusClass = 'alert-success';
+          } else if (data.status) {
+            statusText += data.status;
+            statusClass = 'alert-warning';
+          } else {
+            statusText += '未签到';
+            statusClass = 'alert-secondary';
+          }
+
+          const statusElement = document.getElementById('attendance-state');
+          statusElement.textContent = statusText;
+          statusElement.parentElement.className = `alert ${statusClass}`;
+
+          if (data.hasSignedIn) {
+            signInBtn.disabled = true;
+            signOutBtn.disabled = data.hasSignedOut;
+          } else {
+            signInBtn.disabled = false;
+            signOutBtn.disabled = true;
+          }
+        }
+      } catch (error) {
+        console.error('检查签到状态失败:', error);
+      }
+    }
+
+    // 初始化时检查签到状态
+    checkTodayAttendance();
+  });
+  async function loadTodayStats() {
+    try {
+      const response = await fetch('/api/admin/attendance/today-stats', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        document.getElementById('normal-count').textContent = data.normal || 0;
+        document.getElementById('late-count').textContent = data.late || 0;
+        document.getElementById('early-count').textContent = data.early || 0;
+        document.getElementById('absent-count').textContent = data.absent || 0;
+
+        const total = data.normal + data.late + data.early + data.absent;
+        if (total > 0) {
+          document.getElementById('normal-percent').textContent = `${Math.round(data.normal / total * 100)}%`;
+          document.getElementById('late-percent').textContent = `${Math.round(data.late / total * 100)}%`;
+          document.getElementById('early-percent').textContent = `${Math.round(data.early / total * 100)}%`;
+          document.getElementById('absent-percent').textContent = `${Math.round(data.absent / total * 100)}%`;
+        }
+      }
+    } catch (error) {
+      console.error('加载今日统计失败:', error);
+    }
+  }
+
+    // 加载部门列表
+    async function loadDepartments() {
+      try {
+        const depts = await fetchData('/api/admin/attendance/departments');
+        const select = document.getElementById('deptSelect');
+        select.innerHTML = '<option value="">请选择部门</option>';
+
+        depts.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept.deptName;
+          option.textContent = dept.deptName;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('加载部门列表失败:', error);
+      }
+    }
+
+
+    function displayEmployeeResults(records) {
+      const tbody = document.getElementById('employee-records');
+      if (!tbody) {
+        console.error('未找到 employee-records 元素');
+        return;
+      }
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">没有找到考勤记录</td></tr>';
+        return;
+      }
+
+      try {
+        records.forEach(record => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${formatDate(record.recordDate)}</td>
+            <td>${record.empName}</td>
+            <td>${record.deptName}</td>
+            <td>${record.signInTime || '未签到'}</td>
+            <td>${record.signOutTime || '未签退'}</td>
+            <td class="status-${record.status}">${record.status}</td>
+        `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('显示考勤记录失败:', error);
+      }
+    }
+
+    // 显示部门统计结果
+    function displayDeptResults(records) {
+      const tbody = document.getElementById('dept-stats');
+      if (!tbody) {
+        console.error('未找到 dept-stats 元素');
+        return;
+      }
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">没有找到统计数据</td></tr>';
+        return;
+      }
+
+      records.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${record.deptName || ''}</td>
+          <td>${record.recordDate ? formatDate(record.recordDate) : ''}</td>
+          <td>${record.empName || ''}</td>
+          <td>${record.signInTime || '未签到'}</td>
+          <td>${record.signOutTime || '未签退'}</td>
+          <td>${record.workingHours || ''}</td>
+          <td class="status-${record.status}">${record.status || ''}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // 格式化日期
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // AJAX请求封装
+    async function fetchData(url, method = 'GET', data = null) {
+      const options = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      };
+
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || '请求失败');
+      }
+
+      return await response.json();
+    }
+
+    // 初始化年份选择器
+    function initYearSelect(selector, startYear = 2020, endYear = new Date().getFullYear()) {
+      const select = document.querySelector(selector);
+      if (!select) return;
+
+      select.innerHTML = '';
+      for (let year = endYear; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        select.appendChild(option);
+      }
+      select.value = new Date().getFullYear();
+    }
+
+    // 初始化月份选择器
+    function initMonthSelect(selector) {
+      const select = document.querySelector(selector);
+      if (!select) return;
+
+      select.innerHTML = '';
+      for (let month = 1; month <= 12; month++) {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = `${month}月`;
+        select.appendChild(option);
+      }
+      select.value = new Date().getMonth() + 1;
+    }
+
+    // 显示通知消息
+    function showNotification(message, type = 'success') {
+      // 移除已有的通知
+      const existing = document.querySelector('.notification');
+      if (existing) existing.remove();
+
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div class="toast show">
+            <div class="toast-header">
+                <strong class="me-auto">${type === 'success' ? '成功' : '错误'}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">${message}</div>
+        </div>
+    `;
+
+      document.body.appendChild(notification);
+
+      // 自动隐藏
+      setTimeout(() => {
+        notification.querySelector('.toast').classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+
+      // 点击关闭按钮
+      notification.querySelector('.btn-close').addEventListener('click', () => {
+        notification.querySelector('.toast').classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      });
+    }
+  // 更新今日考勤状态
+  function updateTodayStatus(data) {
+    const today = new Date().toISOString().split('T')[0];
+    const todayRecord = data.find(record => record.recordDate === today);
+    const signInBtn = document.getElementById('sign-in-btn');
+    const signOutBtn = document.getElementById('sign-out-btn');
+
+    if (todayRecord) {
+      if (todayRecord.signInTime) {
+        document.getElementById('emp-sign-in-info').textContent = `签到时间: ${todayRecord.signInTime}`;
+        document.getElementById('emp-attendance-state').textContent = `状态: ${todayRecord.status || '已签到'}`;
+        signInBtn.disabled = true;
+        signOutBtn.disabled = !!todayRecord.signOutTime; // 如果已签退则禁用，否则启用
+      }
+      if (todayRecord.signOutTime) {
+        document.getElementById('emp-sign-out-info').textContent = `签退时间: ${todayRecord.signOutTime}`;
+        signOutBtn.disabled = true;
+      }
+    } else {
+      // 今日无记录时，重置按钮状态
+      signInBtn.disabled = false;
+      signOutBtn.disabled = true;
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.sshProject.mapper.AttendanceMapper">
+
+    <!-- 根据日期查询考勤记录 -->
+    <select id="getRecordByDate" resultType="com.test.sshProject.entity.AttendanceRecord">
+        SELECT * FROM attendance_record
+        WHERE emp_id = #{empId} AND record_date = #{recordDate}
+    </select>
+
+    <!-- 根据员工查询考勤记录 -->
+    <select id="getRecordsByEmployee" resultType="com.test.sshProject.entity.AttendanceRecord">
+        SELECT * FROM attendance_record
+        WHERE emp_id = #{empId}
+            AND YEAR(record_date) = #{year}
+          AND MONTH(record_date) = #{month}
+    </select>
+    <!-- 根据员工姓名模糊查询考勤记录 -->
+    <select id="getRecordsByEmpName" resultType="com.test.sshProject.entity.AttendanceRecord">
+        SELECT ar.* FROM attendance_record ar
+                             JOIN employee e ON ar.emp_id = e.emp_id
+        WHERE e.emp_name LIKE CONCAT('%', #{empName}, '%')
+            AND YEAR(ar.record_date) = #{year}
+          AND MONTH(ar.record_date) = #{month}
+        ORDER BY ar.record_date
+    </select>
+    <!-- 根据部门查询考勤记录 -->
+    <select id="getRecordsByDept" resultType="com.test.sshProject.entity.AttendanceRecord">
+        SELECT * FROM attendance_record
+                          JOIN employee ON attendance_record.emp_id = employee.emp_id
+        WHERE employee.dept_id = #{deptId}
+            AND YEAR(attendance_record.record_date) = #{year}
+          AND MONTH(attendance_record.record_date) = #{month}
+    </select>
+    <!-- 添加通用查询语句（如果需要复用） -->
+    <select id="selectById" resultType="com.test.sshProject.entity.Dept">
+        SELECT * FROM dept WHERE dept_id = #{deptId}
+    </select>
+
+    <!-- 查询公司所有考勤记录 -->
+    <select id="getRecordsByCompany" resultType="com.test.sshProject.entity.AttendanceRecord">
+        SELECT * FROM attendance_record
+        WHERE YEAR(record_date) = #{year}
+          AND MONTH(record_date) = #{month}
+    </select>
+    <update id="updateById" parameterType="com.test.sshProject.entity.AttendanceRecord">
+        UPDATE attendance_record
+        SET
+            emp_id = #{record.empId},
+            record_date = #{record.recordDate},
+            sign_in_time = #{record.signInTime},
+            sign_out_time = #{record.signOutTime},
+            work_hours = #{record.workHours},
+            status = #{record.status},
+            is_working_day = #{record.isWorkingDay},
+            remark = #{record.remark}
+        WHERE record_id = #{record.recordId}
+    </update>
+</mapper>

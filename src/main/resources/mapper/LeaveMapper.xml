@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.sshProject.mapper.LeaveMapper">
+
+    <select id="getByEmpId" resultType="com.test.sshProject.entity.LeaveApplication">
+        SELECT * FROM leave_application
+        WHERE emp_id = #{empId}
+        ORDER BY create_time DESC
+    </select>
+    <update id="approveLeave">
+        UPDATE leave_application
+        SET status = #{status},
+            approve_opinion = #{approveOpinion},
+            approve_time = NOW(),
+            approver_id = #{approverId}
+        WHERE leave_id = #{leaveId}
+    </update>
+    <update id="updateApproverId">
+        UPDATE leave_application
+        SET approver_id = #{approverId}
+        WHERE id = #{id}
+    </update>
+    <!-- 审批更新语句 -->
+    <update id="updateLeaveStatus">
+        UPDATE leave_application
+        SET
+        status = #{status},
+        approver_id = #{approverId}, <!-- 正确字段名 -->
+        approve_time = NOW(),
+        approve_opinion = #{approveOpinion}
+        WHERE leave_id = #{leaveId}
+    </update>
+
+    <!-- 关联查询语句示例 -->
+    <select id="getAllLeaveApplicationsWithDetails" resultType="com.test.sshProject.dto.LeaveApplicationDTO">
+        SELECT
+        la.leave_id,
+        la.emp_id,
+        e.emp_name,
+        d.dept_name,
+        la.leave_type,
+        la.start_date,
+        la.end_date,
+        la.reason,
+        la.status,
+        la.approver_id, <!-- 正确字段名 -->
+        a.emp_name AS approver_name,
+        la.approve_time,
+        la.approve_opinion,
+        la.create_time
+        FROM leave_application la
+        JOIN employee e ON la.emp_id = e.emp_id
+        JOIN dept d ON e.dept_id = d.dept_id
+        LEFT JOIN employee a ON la.approver_id = a.emp_id <!-- 正确字段名 -->
+    </select>
+
+</mapper>

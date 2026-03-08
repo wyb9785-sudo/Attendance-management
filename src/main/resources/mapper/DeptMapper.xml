@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.sshProject.mapper.DeptMapper">
+    <select id="selectById" parameterType="java.lang.Integer" resultType="com.test.sshProject.entity.Dept">
+        SELECT dept_id, dept_name, location FROM dept WHERE dept_id = #{id}
+    </select>
+</mapper>
